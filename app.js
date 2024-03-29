@@ -1,56 +1,58 @@
-/* trunk-ignore-all(prettier) */
 // Place your code here
 // Add any additional code necessary to fulfill the requirements of the assignment
-let taskData = []
 
-const getTaskData = async () => {
-    const response = await fetch(
-        "https://module3-api-is2m.onrender.com/random-todos",
-    );
-    const data = await response.json();
-    taskData = data
-    console.log("task data", data);
+const inputTask = document.getElementById('newTask');
+const inputTaskList = document.getElementById('taskList');
+const taskButton = document.getElementById('addTaskBtn');
 
-    if (data.length > 0) {
-        taskListComponent(data);
+//input data
+function addTask(){
+    if(inputTask.value === ''){
+        alert('Please write something!')
+    }else{
+        let li = document.createElement('li')
+        li.innerHTML = inputTask.value;
+        inputTaskList.appendChild(li);
+        let span = document.createElement('span')
+        span.innerHTML = "\u00d7";
+        li.appendChild(span);
     }
-};
-
-const addTaskData = async () => {
-    const taskList = document.getElementById("taskList");
-    console.log('taskData', taskData)
-    taskList.innerHTML = taskList.innerHTML + `<li id='list-${taskData.length + 1}' class="done">new data</li>`
-};
-
-function onClickTask(index) {
-    console.log('task clicked')
-    const clickedTask = document.getElementById(`list-${index}`)
-    clickedTask.classList.add("done")
+    inputTask.value = '';
 }
 
-const taskListComponent = (taskData) => {
-    const taskList = document.getElementById("taskList");
-    console.log("taskList", taskList);
-    let list = ''
-    if (taskData.length > 0) {
-        for (let i = 0; i < taskData.length; i++) {
-            const element = taskData[i];
-            console.log('element', element);
-            list = list + `<li id='list-${i}' class='task'>${element}</li>`
-        }
-        console.log('list', list)
-        taskList.innerHTML = list
-
-        // adding click event listener for marking done task to our created list
-        for (let i = 0; i < taskData.length; i++) {
-            console.log('add event listener with id list-', i)
-            document.getElementById(`list-${i}`).addEventListener("click", function () { onClickTask(i) });
-            // document.getElementById(`list-${i}`).addEventListener("click", onClickTask(i));
-        }
+//complete or remove data
+inputTaskList.addEventListener('click', function(change){
+    if(change.target.tagName === 'LI'){
+        change.target.classList.toggle('checked');
     }
-    else taskList.innerHTML = `<li>There is no task</li>`
-};
+    else if(change.target.tagName === 'SPAN'){
+        change.target.parentElement.remove();
+    }
+}, false);
 
-getTaskData();
+// function API
+const fetchData = async() =>{
+    const response = await fetch('https://module3-api-is2m.onrender.com/random-todos');
+    return await response.json();
+}
 
-document.getElementById("addTaskBtn").addEventListener("click", addTaskData);
+async function main(){
+    const json = await fetchData()
+    const taskListElement = document.getElementById('taskList')
+    console.log('json', json);
+
+    json.forEach((task) => {
+        let li = document.createElement('li')
+        console.log(task);
+        li.innerHTML = task;
+        let span = document.createElement('span')
+        span.innerHTML = "\u00d7";
+        li.appendChild(span);
+        taskListElement.appendChild(li);
+
+    }); 
+}
+
+taskButton.addEventListener('click', addTask);
+
+main();
